@@ -1,14 +1,21 @@
-import { renderHtml } from "./renderHtml";
+import { addItem } from "./addItem";
+import { fetchItem } from "./fetchItem";
 
 export default {
   async fetch(request, env) {
-    const stmt = env.DB.prepare("SELECT * FROM comments LIMIT 3");
-    const { results } = await stmt.all();
+    const url = new URL(request.url);
 
-    return new Response(renderHtml(JSON.stringify(results, null, 2)), {
-      headers: {
-        "content-type": "text/html",
-      },
+    if (url.pathname === "/" && request.method === "GET") {
+      return fetchItem(request, env);
+    }
+
+    if (url.pathname === "/add" && request.method === "POST") {
+      return addItem(request, env);
+    }
+
+    return new Response("Not Found", {
+      status: 404,
+      statusText: "Not Found",
     });
   },
 } satisfies ExportedHandler<Env>;
